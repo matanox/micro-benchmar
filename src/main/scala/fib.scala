@@ -74,7 +74,7 @@ object Plain1 extends Fib {
 }
 
 object TimedExecution {
-  def apply(f:Fib, times: Int) {
+  def apply(f:Fib, times: Int) = {
     require(times >= 1)
     val totalExecutionTime = 
       (1 to times).map { _ =>
@@ -85,13 +85,24 @@ object TimedExecution {
         elapsed
       }.sum
       
-    println(s"${totalExecutionTime.toFloat / times / 1000 / 1000} ms average elapsed time of ${f.getClass}")
+    totalExecutionTime.toFloat / times
   }
 }
 
 object Main extends App {
   val repeat = 100000
-  Seq(ImmutableNotTailRec, ImmutableTailRec, Plain1, Plain2, Streams) foreach { 
-    TimedExecution(_, repeat) 
+  
+  def run(warmup: Boolean = false) = {
+    warmup match {
+      case true  => println("warming up...")
+      case false => println("measuring...") 
+    }
+    Seq(ImmutableTailRec, ImmutableNotTailRec, Plain1, Plain2, Streams) foreach { f => 
+      val average = TimedExecution(f, repeat)
+      if (!warmup) println(s"${average / 1000 / 1000} ms average elapsed time of ${f.getClass}")
+    }
   }
+
+  run(warmup = true)
+  run()
 }
